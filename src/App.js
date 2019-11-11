@@ -38,7 +38,20 @@ export default class App extends Component {
             </Slider>
         </div>
         <div>
-            <Slider>
+            <Slider settings={{
+                autoPlay:true,
+                transitionTerm:'left',
+                slidesToShow:3,
+                slidesToMove:3,
+                speed:300,
+                delay:2500,
+                dots:true,
+                arrows:true,
+                infinite:false,
+                center:false,
+                arrows:true
+
+              }}>
                 <div className="singleslide" style={{background:"#fe4556"}}>1</div>
                 <div className="singleslide" style={{background:"#ff2056"}}>2</div>
                 <div className="singleslide" style={{background:"#fe4878"}}>3</div>

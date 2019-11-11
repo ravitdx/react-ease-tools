@@ -1,9 +1,11 @@
 import React, { Component } from 'react';
 import './slider.css';
+import FontAwesome from 'react-fontawesome'
 
 export default class Slider extends Component {
   constructor(props)
   {
+    console.log("sdfhgfjgdjfdgsfgdsjfsdgfjgsdjfhj");
     super(props);
     this.state={
       delay:2500,
@@ -37,8 +39,13 @@ export default class Slider extends Component {
 
       },
       prev:null,
-      next:null
-
+      next:null,
+      released:true,
+      moveOffset:0,
+      initialmovement:0,
+      mouseOut:true,
+      hideNext:"",
+      hidePrev:""
     }
     this.default={
       autoPlay:true,
@@ -60,6 +67,8 @@ export default class Slider extends Component {
     this.slideBoard = React.createRef();
     this.children=[];
     this.childrenRefs=[];
+    this.released=true;
+    this.mouseOut=true;
   }
   getNumberOfSlidesToCreate(state)
   {
@@ -265,7 +274,7 @@ export default class Slider extends Component {
     state.totalDots[state.currentIndex]={key:state.currentIndex,class:"highlighted"};
    
     this.setState(state);
-    if(!state.interval && this.state.autoPlay)
+    if(!state.interval && this.state.autoPlay && this.mouseOut)
     {
       let interval=setInterval(()=>{
         if(this.state.movementTowards=="right")
@@ -277,15 +286,16 @@ export default class Slider extends Component {
     }
     if(this.state.next)
     {
-      document.querySelectorAll(this.state.next)[0].addEventListener("mouseup",this.next);
+      document.querySelectorAll(this.state.next)[0].addEventListener("click",this.next);
     }
     if(this.state.prev)
     {
-      document.querySelectorAll(this.state.prev)[0].addEventListener("mouseup",this.prev);
+      document.querySelectorAll(this.state.prev)[0].addEventListener("click",this.prev);
     }
     window.addEventListener("resize",()=>{this.sizeWidget()});
     
   }
+ 
   nextSlide()
   {
     let state=this.state;
@@ -294,10 +304,6 @@ export default class Slider extends Component {
     {
       if(this.state.infinite==false)
       {
-        clearInterval(this.state.interval);
-        state.interval=null;
-        this.setState(state);
-        return;
       }
       else
       {
@@ -325,10 +331,6 @@ export default class Slider extends Component {
     {
       if(this.state.infinite==false)
       {
-        clearInterval(this.state.interval);
-        state.interval=null;
-        this.setState(state);
-        return;
       }
       else
       {
@@ -349,8 +351,39 @@ export default class Slider extends Component {
   {
         if(this.childrenRefs[0])
         {
-          state.boardStyle={...state.boardStyle,left:-(this.childrenRefs[state.currentIndex].offsetLeft)};
-          if(state.interval==null && state.autoPlay)
+          
+          if(state.infinite==false && state.currentIndex<=0)
+          {
+            state.currentIndex=0;
+            state.boardStyle={...state.boardStyle,transition: 'left .5s ease',left:-(this.childrenRefs[state.currentIndex].offsetLeft)};
+            state.hidePrev="disabled";
+            state.hideNext="";
+            clearInterval(this.state.interval);
+            state.interval=null;
+            this.setState(state);
+          }
+          else if(state.infinite==false && state.currentIndex>=(state.children.length-state.slidesToShow))
+          {
+            state.hidePrev="";
+            state.hideNext="disabled";
+            state.currentIndex=this.state.children.length-this.state.slidesToShow;
+            state.boardStyle={...state.boardStyle,transition: 'left .5s ease',left:-(this.childrenRefs[state.currentIndex].offsetLeft)};
+            clearInterval(this.state.interval);
+            state.interval=null;
+            this.setState(state);
+          }
+          else
+          {
+            state.hidePrev="";
+            state.hideNext="";
+            state.boardStyle={...state.boardStyle,left:-(this.childrenRefs[state.currentIndex].offsetLeft)};
+          }
+          if(this.props.children.length<=this.state.slidesToShow)
+          {
+            state.hidePrev="disabled";
+            state.hideNext="disabled";
+          }
+          if(state.interval==null && state.autoPlay && this.mouseOut)
           {
             state.interval=setInterval(()=>{
               if(state.movementTowards=="right")
@@ -363,7 +396,7 @@ export default class Slider extends Component {
           {
             state.totalDots[h]={key:h,class:""};
           }
-          state.totalDots[Math.floor(state.currentIndex/state.slidesToMove)%this.props.children.length]={key:Math.floor(state.currentIndex/state.slidesToMove)%this.props.children.length,class:"highlighted"};
+          state.totalDots[Math.ceil(state.currentIndex/state.slidesToMove)%this.props.children.length]={key:Math.ceil(state.currentIndex/state.slidesToMove)%this.props.children.length,class:"highlighted"};
 
           this.setState(state);
         }
@@ -394,12 +427,101 @@ export default class Slider extends Component {
       state.interval=null;
       this.prevSlide();
   }
+  mouseReleased=(e)=>
+  {
+    
+    if(this.released==false)
+    {
+      this.released=true;
+      if(this.state.initialmovement<0)
+        this.prevSlide();
+      else
+        this.nextSlide();
+      this.setState({initialmovement:0});
+    }
+  }
+  onMouseEnterHandler=(e)=>{
+      clearInterval(this.state.interval);
+      var state=this.state;
+      state.interval=null;
+      this.mouseOut=false;
+      this.released=true;
+      this.setState(state);
+  }
+  onMouseLeaveHandler=(e)=>{
+    let state=this.state;
+      this.mouseOut=true;
+      if(this.released==false)
+      {
+        this.released=true;
+        if(this.state.initialmovement<0)
+          this.prevSlide();
+        else
+          this.nextSlide();
+        this.setState({initialmovement:0});
+      }
+      else{
+        this.released=true;
+        if(!state.interval && this.state.autoPlay)
+        {
+          let interval=setInterval(()=>{
+            if(this.state.movementTowards=="right")
+              this.prevSlide();
+            else
+              this.nextSlide();
+          },this.state.delay);
+          this.setState({interval:interval});
+        }
+      }
+  }
+  dragSlide=(e)=>
+  {
+    let state=this.state;
+    if(this.released==false && this.mouseOut==false)
+    {
+      let pos=0;
+      if(e.touches)
+      {
+        pos=e.touches[0].clientX;
+      }
+      else
+      {
+        pos=e.clientX;
+      }
+      if(this.state.infinite==true)
+      {
+        if(state.currentIndex<=0 && (state.moveOffset-pos)<0)
+        {
+          state.currentIndex=this.state.children.length-this.state.slidesToShow;
+          state.boardStyle={...state.boardStyle,transition: 'none',left:-(this.childrenRefs[state.currentIndex].offsetLeft)};
+          this.setSlide(state);
+        }
+        else if(state.currentIndex>=(this.state.children.length-this.state.slidesToShow) && (state.moveOffset-pos)>0)
+        {
+            state.boardStyle={...state.boardStyle,transition: 'none',left:0};
+            state.currentIndex=0;
+            this.setSlide(state);
+          
+        }
+      }
+      
+      
+      state.boardStyle={...state.boardStyle,left:state.boardStyle.left-(state.moveOffset-pos),transition: 'none'};
+  
+      state.initialmovement+=(state.moveOffset-pos);
+  
+      state.moveOffset=pos;
+      this.setState(state);
+    }
+    
+  }
   render()
   {
     return (
-      <div className="slider-root" ref={this.slideRoot}  style={this.state.windowStyle}>
+      <div className="slider-root" ref={this.slideRoot} onTouchEnd={this.mouseReleased} onMouseUp={this.mouseReleased}
+       onMouseMove={this.dragSlide} onTouchMove={this.dragSlide} onMouseEnter={this.onMouseEnterHandler}  onMouseLeave={this.onMouseLeaveHandler} style={this.state.windowStyle}>
           
-          <div className="slide-board" ref={this.slideBoard} style={this.state.boardStyle}>
+          <div className="slide-board" ref={this.slideBoard}  onMouseDown={(e)=>{this.mouseOut=false;this.released=false;this.setState({moveOffset:e.clientX,initialmovement:0});}} onTouchStart={(e)=>{this.mouseOut=false;this.released=false;this.setState({moveOffset:e.touches[0].clientX,initialmovement:0});}}  style={this.state.boardStyle}>
               {
                 this.state.children
               }
@@ -409,9 +531,9 @@ export default class Slider extends Component {
                 this.state.dots?this.state.totalDots.map((dot)=><div key={dot.key} dot-key={dot.key} className={"dot "+dot.class} onClick={this.getCurrent}></div>):<div/>
               }
           </div>
-          {this.state.arrows?<div>{!this.state.prev?<div className="prev" onClick={this.prev}>
+          {this.state.arrows?<div>{!this.state.prev?<div className={"prev "+this.state.hidePrev} onClick={this.prev}> <FontAwesome className="slider-nav-icon" name="chevron-left" />
           </div>:<div/>}
-          {!this.state.next?<div className="next" onClick={this.next}>
+          {!this.state.next?<div className={"next "+this.state.hideNext} onClick={this.next}><FontAwesome className="slider-nav-icon" name="chevron-right" />
             </div>:<div/>}</div>:<div/>}
           
       </div>
