@@ -205,10 +205,14 @@ export default class Slider extends Component {
     { 
         var noOfSides=this.getNumberOfSlidesToCreate(state)*this.props.children.length+this.state.slidesToShow;
     }
-    
+    while(state.children.length > 0) {
+        state.children.pop();
+    }
+    while(this.childrenRefs.length > 0) {
+        this.childrenRefs.pop();
+    }
     state.children=new Array(noOfSides);
     this.childrenRefs=new Array(noOfSides);
-    
     for(let i=0;i<noOfSides;i++)
     {
         let obj={...this.props.children[i%this.props.children.length].props.style,width:this.state.slideWidth,minHeight:100,float:"left",position:"relative",display:"inline-block"}
@@ -317,6 +321,10 @@ export default class Slider extends Component {
     setTimeout(()=>{
       state.boardStyle={...state.boardStyle,transition: 'left .5s ease'};
       state.currentIndex+=this.state.slidesToMove;
+      if(state.currentIndex>(this.state.children.length-this.state.slidesToShow))
+      {
+        state.currentIndex=(this.state.children.length-this.state.slidesToShow);
+      }
       this.setSlide(state);
     },wentIn);
     
@@ -343,6 +351,10 @@ export default class Slider extends Component {
     setTimeout(()=>{
       state.boardStyle={...state.boardStyle,transition: 'left .5s ease'};
       state.currentIndex-=this.state.slidesToMove;
+      if(state.currentIndex<0)
+      {
+        state.currentIndex=0;
+      }
       this.setSlide(state);
     },wentIn);
     
@@ -351,7 +363,6 @@ export default class Slider extends Component {
   {
         if(this.childrenRefs[0])
         {
-          
           if(state.infinite==false && state.currentIndex<=0)
           {
             state.currentIndex=0;
@@ -435,7 +446,7 @@ export default class Slider extends Component {
       this.released=true;
       if(this.state.initialmovement<0)
         this.prevSlide();
-      else
+      else if(this.state.initialmovement>0)
         this.nextSlide();
       this.setState({initialmovement:0});
     }

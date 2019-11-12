@@ -42,7 +42,7 @@ export default class App extends Component {
                 autoPlay:true,
                 transitionTerm:'left',
                 slidesToShow:3,
-                slidesToMove:3,
+                slidesToMove:1,
                 speed:300,
                 delay:2500,
                 dots:true,

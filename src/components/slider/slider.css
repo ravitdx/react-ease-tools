@@ -88,4 +88,5 @@
 .prev.disabled .slider-nav-icon,.prev.disabled:hover .slider-nav-icon,.next.disabled .slider-nav-icon,.next.disabled:hover .slider-nav-icon{
     background:#fff;
     color: #999999;
+    pointer-events: none;
 }
