@@ -5,7 +5,6 @@ import FontAwesome from 'react-fontawesome'
 export default class Slider extends Component {
   constructor(props)
   {
-    console.log("sdfhgfjgdjfdgsfgdsjfsdgfjgsdjfhj");
     super(props);
     this.state={
       delay:2500,

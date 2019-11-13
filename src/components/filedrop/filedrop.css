@@ -1,0 +1,56 @@
+
+.drop-container{
+    border:2px dashed #00b3b3;
+    padding:20px;
+    border-radius: 3px;
+    background:#ccffff; 
+    user-select: none;
+    -moz-user-select: none;
+    -khtml-user-select: none;
+    -webkit-user-select: none;
+    -o-user-select: none;
+    transition:all .3s ease;
+    text-align:center;
+    color:#00cccc;
+    cursor:pointer;
+}
+.drop-container:hover{
+    border:2px dashed #00cccc;
+    background:#e6ffff; 
+}
+.draggedOver{
+    font-size: 16px;
+}
+.compoundProgressBack{
+    height: 15px;
+    width: 60%;
+    max-width: 500px;
+    min-width: 200px;
+    background: #006666;
+    display: inline-block;
+    position: relative
+}
+.simpleProgressBack{
+    height: 5px;
+    width: 60%;
+    max-width: 300px;
+    min-width: 100px;
+    background: #006666;
+    display: inline-block;
+    position: relative;
+    margin-left:5px;
+}
+.compoundProgressBar{
+    position: absolute;
+    height:100%;
+    width:0;
+    left: 0;
+    top: 0;
+    background: #00b3b3;
+}
+.output-success{
+    color:#215f3f;padding:10px;background:#d9f2e5;
+}
+.output-failed{
+    color:#660000;padding:10px;background:#ffe6e6;
+}
